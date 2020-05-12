@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.chinamobile.iot.xiaoyan.bgapi.mapper.FeaturedContentMapper">
+    <resultMap id="FeaturedContentResultMap" type="FeaturedContent">
+        <id column="id" property="id" jdbcType="VARCHAR"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="description" property="description"/>
+        <result column="type" property="type" jdbcType="INTEGER"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <association property="resourceAddressList" columnPrefix="res_"
+                     resultMap="com.chinamobile.iot.xiaoyan.bgapi.mapper.ResourceAddressMapper.ResourceAddressResultMap"/>
+    </resultMap>
+
+    <select id="getAllContent" resultMap="FeaturedContentResultMap">
+        select id,name,description,type,create_time,update_time from featured_content content
+    </select>
+
+    <select id="getContentByTypeAndLimit" resultMap="FeaturedContentResultMap">
+        select content.id,content.name,content.description,content.type,content.create_time,content.update_time,
+        resource.id res_id,resource.address res_address,resource.target_id res_target_id,
+        resource.description res_description
+        from featured_content content
+        left join resource_address resource
+        on content.id=resource.target_id
+        where content.type=#{type}
+        order by content.update_time desc
+        <!--limit 0,#{limit}-->
+    </select>
+
+    <insert id="addFeaturedContent" parameterType="FeaturedContent">
+        insert into featured_content
+        (id,name,type,description,create_time,update_time)
+        values(uuid(),#{name},#{type},#{description},now(),now())
+    </insert>
+
+    <delete id="removeFeaturedContentById">
+        delete from featured_content where id=#{id}
+    </delete>
+
+    <update id="updateFeaturedContent" parameterType="FeaturedContent">
+        update featured_content
+        <set>
+            <if test="name!= null">
+                name = #{name},
+            </if>
+            <if test="type!= null">
+                type = #{type},
+            </if>
+            <if test="description!= null">
+                description = #{description},
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+
+</mapper>

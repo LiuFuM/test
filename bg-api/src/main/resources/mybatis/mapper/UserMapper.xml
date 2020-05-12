@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.chinamobile.iot.xiaoyan.bgapi.mapper.UserMapper">
+    <resultMap id="UserResultMap" type="User">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="type" property="type"/>
+        <result column="salt" property="salt"/>
+        <result column="status" property="status"/>
+        <association property="role" columnPrefix="role_"
+                     resultMap="com.chinamobile.iot.xiaoyan.bgapi.mapper.RoleMapper.RoleResultMap"/>
+    </resultMap>
+
+    <select id="findUserByUsername" resultMap="UserResultMap" parameterType="String">
+        select user.id,user.name,user.username,user.status,role.name role_name, role.description
+        role_description,rp.role_id role_id ,rp.permission_id role_permission_id,permission.function
+        role_permission_function,permission.description role_permission_description from users user left join user_role
+        ur on user.id=ur.user_id left join roles role on role.id=ur.role_id left join role_permission rp on
+        ur.role_id=rp.role_id left join permissions permission on rp.permission_id = permission.id where user.status=1
+        and user.username=#{username}
+    </select>
+
+    <select id="checkLogin" resultMap="UserResultMap" parameterType="User">
+        select id,name,username,status
+        from users
+        where status=1 and username=#{username} and password=#{password}
+    </select>
+
+    <select id="getSalt" resultType="String" parameterType="User">
+        select salt
+        from users
+        where status=1 and username=#{username}
+    </select>
+
+    <select id="getStatus" resultType="Integer" parameterType="User">
+        select status
+        from users
+        where username=#{username}
+    </select>
+
+    <insert id="addUser" parameterType="User">
+        insert into users
+        (id, username,password,salt,status, name)
+        values
+        (uuid(),#{username},#{password},#{salt},#{status},#{name})
+    </insert>
+
+    <select id="listAllUsers" resultMap="UserResultMap">
+        select user.id,user.name,user.username,user.status,role.name role_name, role.description
+        role_description,rp.role_id role_id ,rp.permission_id role_permission_id,permission.function
+        role_permission_function,permission.description role_permission_description from users user left join user_role
+        ur on user.id=ur.user_id left join roles role on role.id=ur.role_id left join role_permission rp on
+        ur.role_id=rp.role_id left join permissions permission on rp.permission_id = permission.id
+    </select>
+
+    <update id="updateUserPasswordByUsername" parameterType="User">
+        update users
+        <set>
+            <if test="password != null">
+                password = #{password},
+            </if>
+        </set>
+        where username = #{username}
+    </update>
+
+    <update id="updateUser" parameterType="User">
+        update users
+        <set>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="username != null">
+                username = #{username},
+            </if>
+            <if test="password != null">
+                password = #{password},
+            </if>
+            <if test="status != 0">
+                status = #{status},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <update id="disableUser" parameterType="User">
+        update users
+        set status=0
+        where id = #{id}
+    </update>
+
+    <insert id="addRole2User" parameterType="String">
+        insert into user_role
+        (id, user_id, role_id)
+        values
+        (uuid(),#{userId},#{roleId})
+    </insert>
+
+    <update id="updateUserRole" parameterType="String">
+        update user_role
+        set role_id=#{roleId}
+        where user_id=#{userId}
+    </update>
+
+    <update id="enableUser" parameterType="User">
+        update users
+        set status=1
+        where id = #{id}
+    </update>
+
+</mapper>

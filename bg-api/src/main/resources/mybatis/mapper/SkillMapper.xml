@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.chinamobile.iot.xiaoyan.bgapi.mapper.SkillMapper">
+    <resultMap id="SkillResultMap" type="Skill">
+        <id column="id" property="id" jdbcType="VARCHAR"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="description" property="description" jdbcType="CLOB"/>
+        <result column="rate" property="rate" jdbcType="INTEGER"/>
+        <result column="type" property="type" jdbcType="INTEGER"/>
+        <result column="times_searched" property="timesSearched"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <association property="developer" columnPrefix="developer_"
+                     resultMap="com.chinamobile.iot.xiaoyan.bgapi.mapper.DeveloperMapper.DeveloperResultMap"/>
+        <collection property="skillIconList" columnPrefix="icon_"
+                    resultMap="com.chinamobile.iot.xiaoyan.bgapi.mapper.ResourceAddressMapper.ResourceAddressResultMap"/>
+        <collection property="skillExamples" columnPrefix="ex_"
+                    resultMap="com.chinamobile.iot.xiaoyan.bgapi.mapper.SkillExampleMapper.skillExampleResultMap"/>
+    </resultMap>
+
+    <select id="listAllOrderBySearched" resultMap="SkillResultMap" parameterType="Integer">
+        select
+        skill.id id,skill.description description,skill.name,skill.rate,
+        skill.developer_id,skill.create_time,skill.update_time,skill.times_searched times_searched,
+        dev.id developer_id,skill.type,
+        dev.name developer_name,dev.type developer_type, dev.create_time developer_create_time,
+        example.example ex_example,example.id ex_id,example.create_time ex_create_time,
+        example.update_time ex_update_time, example.skill_id ex_skill_id,example.if_multi ex_if_multi,
+        icon.id icon_id, icon.address icon_address,icon.target_id icon_target_id,icon.description icon_description
+        from skills skill
+        join developers dev on skill.developer_id=dev.id
+        left join skill_examples example on example.skill_id=skill.id
+        left join resource_address icon on icon.target_id=skill.id
+        order by skill.times_searched desc
+    </select>
+
+    <select id="listAll" resultMap="SkillResultMap">
+        select
+        skill.id id,skill.description description,skill.name,skill.rate,
+        skill.developer_id,skill.create_time,skill.update_time,skill.times_searched times_searched,
+        dev.id developer_id,skill.type,
+        dev.name developer_name,dev.type developer_type, dev.create_time developer_create_time,
+        example.example ex_example,example.id ex_id,example.create_time ex_create_time,
+        example.update_time ex_update_time, example.skill_id ex_skill_id,example.if_multi ex_if_multi
+        from skills skill
+        join developers dev on skill.developer_id=dev.id
+        left join skill_examples example on example.skill_id=skill.id
+        order by skill.create_time desc
+    </select>
+
+    <select id="searchSkillByName" resultMap="SkillResultMap">
+        select
+        skill.id id,skill.description description,skill.name,skill.rate,
+        skill.developer_id,skill.create_time,skill.update_time,skill.times_searched times_searched,
+        dev.id developer_id,skill.type,
+        dev.name developer_name,dev.type developer_type, dev.create_time developer_create_time,
+        example.example ex_example,example.id ex_id,example.create_time ex_create_time,
+        example.update_time ex_update_time, example.skill_id ex_skill_id,example.if_multi ex_if_multi,
+        icon.id icon_id, icon.address icon_address,icon.target_id icon_target_id,icon.description icon_description
+        from skills skill
+        join developers dev on skill.developer_id=dev.id
+        left join skill_examples example on example.skill_id=skill.id
+        left join resource_address icon on icon.target_id=skill.id
+        where skill.name like concat('%',#{name},'%')
+        order by skill.create_time desc
+    </select>
+
+    <!-- 上面的mapper已经弃用 增加了技能icon的1对多子对象 -->
+    <select id="listAllWithResource" resultMap="SkillResultMap">
+        select
+        skill.id id,skill.description description,skill.name,skill.rate,
+        skill.developer_id,skill.create_time,skill.update_time,
+        dev.id developer_id,skill.type,skill.times_searched times_searched,
+        dev.name developer_name,dev.type developer_type, dev.create_time developer_create_time,
+        example.example ex_example,example.id ex_id,example.create_time ex_create_time,
+        example.update_time ex_update_time, example.skill_id ex_skill_id,example.if_multi ex_if_multi,
+        icon.id icon_id, icon.address icon_address,icon.target_id icon_target_id,icon.description icon_description
+        from skills skill
+        join developers dev on skill.developer_id=dev.id
+        left join skill_examples example on example.skill_id=skill.id
+        left join resource_address icon on icon.target_id=skill.id
+        order by skill.create_time desc
+    </select>
+
+    <select id="getAllSkillName" resultMap="SkillResultMap">
+        select id,name from skills order by create_time desc
+    </select>
+
+    <insert id="addSkill" parameterType="Skill">
+        insert into skills (id,developer_id,description,name,type,create_time,update_time)
+        values(uuid(),#{developer.id},#{description},#{name},#{type},now(),now())
+    </insert>
+
+    <update id="updateSkill" parameterType="Skill">
+        update skills
+        <set>
+            <!--<if test="developer.id != null">-->
+                <!--developer_id = #{developer.id},-->
+            <!--</if>-->
+            <if test="description != null">
+                description = #{description},
+            </if>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="type != 0">
+                type = #{type},
+            </if>
+            <if test="timesSearched != 0">
+                times_searched = #{timesSearched},
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+
+    <delete id="removeSkill" parameterType="Skill">
+        delete from skills where id=#{id}
+    </delete>
+
+</mapper>

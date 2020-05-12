@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.chinamobile.iot.xiaoyan.bgapi.mapper.MiguVoiceMapper">
+    <resultMap id="MiguVoiceResultMap" type="MiguVoice">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="voice_author" property="voiceAuthor"/>
+        <result column="text_author" property="textAuthor"/>
+        <result column="category_name" property="categoryName"/>
+        <result column="category_id" property="categoryId"/>
+        <result column="cover_image_url" property="coverImageUrl"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <insert id="addMiguVoice" parameterType="MiguVoice">
+        insert into migu_voice
+        (id, name, voice_author, text_author, category_name, category_id, cover_image_url, create_time )
+        values
+        (#{id},#{name},#{voiceAuthor},#{textAuthor},#{categoryName},#{categoryId},#{coverImageUrl},now())
+    </insert>
+
+    <delete id="removeAll">
+        delete from migu_voice where 1=1
+    </delete>
+
+    <select id="listAll" resultMap="MiguVoiceResultMap">
+        select * from migu_voice order by sid
+    </select>
+
+    <select id="listByPage" resultMap="MiguVoiceResultMap">
+        select * from migu_voice order by sid
+    </select>
+
+    <select id="searchByCategory" resultMap="MiguVoiceResultMap">
+        select * from migu_voice  where category_id=#{categoryID} order by sid
+    </select>
+
+</mapper>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.chinamobile.iot.xiaoyan.bgapi.mapper.SkillExampleMapper">
+    <resultMap id="skillExampleResultMap" type="SkillExample">
+        <id property="id" column="id"/>
+        <result property="example" column="example"/>
+        <result property="skillId" column="skill_id"/>
+        <result property="ifMulti" column="if_multi"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id, skill_id, example,if_multi,create_time,update_time
+    </sql>
+    <select id="getExamplesOfSkill" resultMap="skillExampleResultMap" parameterType="Skill">
+        select
+        <include refid="Base_Column_List"/>
+        from skill_examples
+        where skill_id=#{id} order by create_time
+    </select>
+
+    <insert id="addExample" parameterType="SkillExample">
+        insert into skill_examples (id,skill_id,example,create_time,update_time,if_multi)
+        values(uuid(),#{skillId},#{example},now(),now(),#{ifMulti})
+    </insert>
+
+    <delete id="removeExample" parameterType="SkillExample">
+        delete from skill_examples
+        where id=#{id}
+    </delete>
+
+    <update id="updateExample" parameterType="SkillExample">
+        update skill_examples
+        <set>
+            <if test="example != null">
+                example = #{example},
+            </if>
+            <if test="skillId != null">
+                skill_id = #{skillId},
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+
+</mapper>

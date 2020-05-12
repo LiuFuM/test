@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.chinamobile.iot.xiaoyan.bgapi.mapper.BannerMapper">
+    <resultMap id="BannerResultMap" type="Banner">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="description" property="description"/>
+        <result column="type" property="type"/>
+        <result column="status" property="status"/>
+        <result column="url" property="url"/>
+        <result column="create_time" property="createTime"/>
+        <collection property="resourceAddressList" columnPrefix="image_"
+                    resultMap="com.chinamobile.iot.xiaoyan.bgapi.mapper.ResourceAddressMapper.ResourceAddressResultMap"/>
+    </resultMap>
+
+    <select id="listAll" resultMap="BannerResultMap">
+        select banner.id,banner.name,banner.description,banner.type,banner.status,banner.url,banner.create_time,
+        image.id image_id, image.address image_address,image.target_id image_target_id,image.description
+        image_description
+        from banners banner
+        left join resource_address image on image.target_id=banner.id
+        where status=1
+        order by banner.create_time desc
+    </select>
+
+    <insert id="addBanner" parameterType="Banner">
+        insert into banners
+        (id, name, description, type, status, url, create_time )
+        values
+        (uuid(),#{name},#{description},#{type},#{status},#{url},now())
+    </insert>
+
+    <update id="disableBanner">
+        update banners
+        set status=0
+        where id = #{id}
+    </update>
+
+    <delete id="removeBanner">
+        delete from banners
+        where id=#{id}
+    </delete>
+
+</mapper>

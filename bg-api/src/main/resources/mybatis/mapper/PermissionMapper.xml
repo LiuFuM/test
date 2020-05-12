@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.chinamobile.iot.xiaoyan.bgapi.mapper.PermissionMapper">
+    <resultMap id="PermissionResultMap" type="Permission">
+        <id column="id" property="id"/>
+        <result column="function" property="function"/>
+        <result column="description" property="description"/>
+    </resultMap>
+
+    <select id="getPermissionByRole" resultMap="PermissionResultMap" parameterType="Role">
+        select permission.function function,permission.id id,
+        permission.description description
+        from roles role
+        left join role_permission rp
+        on role.id=rp.role_id
+        left join permissions permission
+        on rp.permission_id=permission.id
+        where role.id=#{id}
+    </select>
+
+    <select id="listAll" resultMap="PermissionResultMap">
+        select id,function,description from permissions order by create_time desc
+    </select>
+
+    <insert id="addPermission" parameterType="Permission">
+        insert into permissions
+        (id, function,description,create_time)
+        values
+        (uuid(),#{function},#{description},now())
+    </insert>
+
+    <delete id="removePermission">
+        delete from permissions
+        where id=#{id}
+    </delete>
+
+    <delete id="removePermissionOfRole" parameterType="String">
+        delete from role_permission
+        where role_id=#{roleId} and permission_id =#{permissionId}
+    </delete>
+
+    <insert id="addPermissionOfRole" parameterType="String">
+        insert into role_permission
+        (id, role_id,permission_id)
+        values
+        (uuid(),#{roleId},#{permissionId})
+    </insert>
+
+</mapper>

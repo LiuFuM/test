@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.chinamobile.iot.xiaoyan.bgapi.mapper.RoleMapper">
+    <resultMap id="RoleResultMap" type="Role">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="description" property="description"/>
+        <collection property="permissionList" columnPrefix="permission_"
+                    resultMap="com.chinamobile.iot.xiaoyan.bgapi.mapper.PermissionMapper.PermissionResultMap"/>
+    </resultMap>
+
+    <select id="listAllRole" resultMap="RoleResultMap">
+        select role.id,role.name,role.description,permission.function permission_function,permission.id permission_id,
+        permission.description permission_description
+        from roles role
+        left join role_permission rp
+        on role.id=rp.role_id
+        left join permissions permission
+        on rp.permission_id=permission.id
+    </select>
+
+    <insert id="addRole" parameterType="Role">
+        insert into roles
+        (id, name,description)
+        values
+        (uuid(),#{name},#{description})
+    </insert>
+
+    <delete id="removeRole">
+        delete from roles
+        where id=#{id}
+    </delete>
+
+</mapper>
